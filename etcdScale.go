@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cloudbec/etcdScale/machine"
+	"github.com/cloudbec/etcdScale/stringutil"
 	"github.com/coreos/go-etcd/etcd"
 )
 
@@ -21,6 +23,7 @@ import (
 
 func main() {
 
+	stringutil.Reverse("yo")
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
@@ -60,22 +63,29 @@ func main() {
 	client := etcd.NewClient([]string{"http://172.17.42.1:4002"})
 
 	cluster := client.GetCluster()
-	fmt.Println(cluster)
+
+	fmt.Print("this cluster ")
+	fmt.Println(cluster[0])
 	// client
 
-	getEtcdCtlMemberAPI("infra5")
+	// getEtcdCtlMemberAPI("infra5")
 
 	//	curl http://172.17.42.1:4002/v2/members -XPOST -H "Content-Type: application/json" -d '{"peerURLs":["http://10.0.0.10:2380"]}'
 	//	postData := `{"name":"infra5", "peerURLs":["http://172.17.42.1:4005"] }
-	var thismachine machine
-	docker0ifip, _ := externalIPFromIf("docker0")
+	var thismachine machine.Machine
+	thismachine.Port = 4005
+	thismachine.ClusterURL = cluster[0]
 
-	thismachine.peerip = docker0ifip
+	docker0ifip, _ := externalIPFromIf("docker0")
+	thismachine.Clusterip = net.ParseIP("172.17.42.1") // net.ParseIP(cluster[0])
+	thismachine.ClusterPort = 4002
+	thismachine.Peerip = docker0ifip
 	// machine.addetcdmember()
 	Eth0IPv4, err := externalIPFromIf("docker0")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	print(thismachine.Addetcdmember())
 
 	fmt.Println(Eth0IPv4.String)
 
@@ -113,7 +123,7 @@ func loopWatch(client *etcd.Client, key string, watch chan *etcd.Response) {
 func externalIPFromIf(ipv4Iface string) (net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	for _, iface := range ifaces {
 		// fmt.Print("nom de l'interface : \t")
@@ -150,7 +160,7 @@ func externalIPFromIf(ipv4Iface string) (net.IP, error) {
 
 		}
 	}
-	return _, errors.New("are you connected to the network?")
+	return nil, errors.New("are you connected to the network?")
 }
 
 func printCommand(cmd *exec.Cmd) {
@@ -218,8 +228,8 @@ func getEtcdCtlMemberAPI(machineName string) {
 
 }
 
-func (string) printMachineStatus(stdOut []byte, stdErr error) {
-	if strings.Contains(string(stdOut), "Added member named "+machineName) {
+func printMachineStatus(stdOut []byte, stdErr error) {
+	if strings.Contains(string(stdOut), "Added member named "+"infra5") {
 		printOutput(
 			stdOut,
 		)
@@ -229,9 +239,4 @@ func (string) printMachineStatus(stdOut []byte, stdErr error) {
 		printError(stdErr)
 
 	}
-}
-
-type machine struct {
-	status string
-	name   string
 }
