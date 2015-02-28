@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/cloudbec/etcdScale/machine"
-	"github.com/cloudbec/etcdScale/stringutil"
+
 	"github.com/coreos/go-etcd/etcd"
 )
 
@@ -23,7 +23,6 @@ import (
 
 func main() {
 
-	stringutil.Reverse("yo")
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
