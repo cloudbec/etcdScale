@@ -67,13 +67,17 @@ func main() {
 
 	//	curl http://172.17.42.1:4002/v2/members -XPOST -H "Content-Type: application/json" -d '{"peerURLs":["http://10.0.0.10:2380"]}'
 	//	postData := `{"name":"infra5", "peerURLs":["http://172.17.42.1:4005"] }
+	var thismachine machine
+	docker0ifip, _ := externalIPFromIf("docker0")
 
+	thismachine.peerip = docker0ifip
+	// machine.addetcdmember()
 	Eth0IPv4, err := externalIPFromIf("docker0")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Println(Eth0IPv4)
+	fmt.Println(Eth0IPv4.String)
 
 	// resp, err := client.Get("creds", false, false)
 	// if err != nil {
@@ -106,7 +110,7 @@ func loopWatch(client *etcd.Client, key string, watch chan *etcd.Response) {
 
 }
 
-func externalIPFromIf(ipv4Iface string) (string, error) {
+func externalIPFromIf(ipv4Iface string) (net.IP, error) {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		return "", err
@@ -125,9 +129,7 @@ func externalIPFromIf(ipv4Iface string) (string, error) {
 			}
 
 			addrs, err := iface.Addrs()
-			if err != nil {
-				return "", err
-			}
+
 			for _, addr := range addrs {
 				var ip net.IP
 				switch v := addr.(type) {
@@ -143,12 +145,12 @@ func externalIPFromIf(ipv4Iface string) (string, error) {
 				if ip == nil {
 					continue // not an ipv4 address
 				}
-				return ip.String(), nil
+				return ip, err
 			}
 
 		}
 	}
-	return "", errors.New("are you connected to the network?")
+	return _, errors.New("are you connected to the network?")
 }
 
 func printCommand(cmd *exec.Cmd) {
