@@ -18,21 +18,7 @@ type Machine struct {
 	ClusterURL  string
 }
 
-// An IPNet represents an IP network.
-type IPNet struct {
-	IP   net.IP     // network number
-	Mask net.IPMask // network mask
-}
-
-// Reverse my comment
-func Reverse(s string) string {
-	r := []rune(s)
-	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
-		r[i], r[j] = r[j], r[i]
-	}
-	return string(r)
-}
-
+// Addetcmember add current machineconfig  to configured cluster in Machine struct
 func (currentmachine Machine) Addetcdmember() string {
 
 	//	url := fmt.Sprint("http://", currentmachine.Clusterip, ":4002/v2/members")
@@ -51,11 +37,6 @@ func (currentmachine Machine) Addetcdmember() string {
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	return string(body)
-}
-
-// Print print hello
-func Print() {
-	fmt.Print("hello")
 }
 
 // func (machine) printMachineStatus(stdOut []byte, stdErr error) {
