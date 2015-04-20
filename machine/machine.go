@@ -20,19 +20,19 @@ type Machine struct {
 	ClusterURL  string
 }
 
-type error_addEtcdMember struct {
+type errorAddEtcdMember struct {
 	s string
 }
 
-func (e *error_addEtcdMember) Error() string {
+func (e *errorAddEtcdMember) Error() string {
 	return e.s
 }
 
-type Cluster struct {
-	ClientURLs []string `json:"clientURLs"`
-	Id         string   `json:"id"`
+type Member struct {
+	ID         string   `json:"id"`
 	Name       string   `json:"name"`
 	PeerURLs   []string `json:"peerURLs"`
+	ClientURLs []string `json:"clientURLs"`
 }
 
 // type Cluster struct {
@@ -46,7 +46,7 @@ type Message struct {
 }
 
 // Addetcmember add current machineconfig  to configured cluster in Machine struct
-func (currentmachine Machine) Addetcdmember() (*Cluster, error) {
+func (currentmachine Machine) Addetcdmember() (*Member, error) {
 
 	// cluster := &Cluster{}
 
@@ -75,20 +75,20 @@ func (currentmachine Machine) Addetcdmember() (*Cluster, error) {
 	// Here's the actual decoding, and a check for
 	// associated errors.
 
-	cluster := &Cluster{}
+	cluster := &Member{}
 	err = json.Unmarshal(byt, &cluster)
 
 	message := &Message{}
 	err = json.Unmarshal(byt, &message)
-	if !reflect.DeepEqual(new(Cluster), cluster) {
+	if !reflect.DeepEqual(new(Member), cluster) {
 		fmt.Println("equal")
 		return cluster, nil
 	} else if message != nil {
-		return new(Cluster), &error_addEtcdMember{message.Txt}
+		return new(Member), &errorAddEtcdMember{message.Txt}
 
 	}
 
-	return new(Cluster), &error_addEtcdMember{err.Error()}
+	return new(Member), &errorAddEtcdMember{err.Error()}
 
 }
 
