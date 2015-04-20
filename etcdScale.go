@@ -11,6 +11,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"reflect"
+
 	"strings"
 	"time"
 
@@ -61,10 +63,10 @@ func main() {
 
 	client := etcd.NewClient([]string{"http://172.17.42.1:4002"})
 
-	cluster := client.GetCluster()
+	cluster_etcdlib := client.GetCluster()
 
-	fmt.Print("this cluster ")
-	fmt.Println(cluster[0])
+	// fmt.Print("this cluster ")
+	// fmt.Println(cluster_etcdlib[0])
 	// client
 
 	// getEtcdCtlMemberAPI("infra5")
@@ -73,7 +75,7 @@ func main() {
 	//	postData := `{"name":"infra5", "peerURLs":["http://172.17.42.1:4005"] }
 	var thismachine machine.Machine
 	thismachine.Port = 4005
-	thismachine.ClusterURL = cluster[0]
+	thismachine.ClusterURL = cluster_etcdlib[0]
 
 	docker0ifip, _ := externalIPFromIf("docker0")
 	thismachine.Clusterip = net.ParseIP("172.17.42.1") // net.ParseIP(cluster[0])
@@ -84,8 +86,16 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	print(thismachine.Addetcdmember())
 
+	cluster, err := thismachine.Addetcdmember()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// https: //github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructurehttps://github.com/mitchellh/mapstructure
+	fmt.Println(reflect.TypeOf(cluster))
+	fmt.Println("machine: ", cluster.Id)
+	fmt.Println("message: ", err)
 	fmt.Println(Eth0IPv4.String)
 
 	// resp, err := client.Get("creds", false, false)
