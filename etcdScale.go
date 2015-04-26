@@ -77,15 +77,12 @@ func main() {
 	thismachine.Port = 4005
 	thismachine.ClusterURL = clusterEtcdlib[0]
 
-	docker0ifip, _ := externalIPFromIf("docker0")
-	thismachine.Clusterip = net.ParseIP("172.17.42.1") // net.ParseIP(cluster[0])
+	currentmachineip, err := externalIPFromIf("eth0")
+
+	thismachine.Clusterip = net.ParseIP(clusterEtcdlib[0]) // net.ParseIP(cluster[0])
 	thismachine.ClusterPort = 4002
-	thismachine.Peerip = docker0ifip
+	thismachine.Peerip = currentmachineip
 	// machine.addetcdmember()
-	Eth0IPv4, err := externalIPFromIf("docker0")
-	if err != nil {
-		log.Fatalln(err)
-	}
 
 	member, err := thismachine.Addetcdmember()
 	if err != nil {
@@ -96,7 +93,6 @@ func main() {
 	fmt.Println(reflect.TypeOf(member))
 	fmt.Println("machine: ", member.ID)
 	fmt.Println("message: ", err)
-	fmt.Println(Eth0IPv4.String)
 
 	// resp, err := client.Get("creds", false, false)
 	// if err != nil {

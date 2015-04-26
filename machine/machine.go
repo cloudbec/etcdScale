@@ -10,6 +10,12 @@ import (
 	"reflect"
 )
 
+type Cluster struct {
+	Leader   string   `json:"leader"`
+	Machines []string `json:"machines"`
+	picked   int
+}
+
 // Machine represent etcd machine
 type Machine struct {
 	Name        string
